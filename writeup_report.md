@@ -91,9 +91,9 @@ I added an early_stop callback (line 147) to stop the training once there is no 
 I used a checkpoint callback to save the best model based on val_loss (line 149). I also added a tensorboard callback to monitor the loss (mse) and mae.
 
 This is my final results:
-    * Training set (80%): loss: 0.0130 - mean_absolute_error: 0.0637
-    * Validation set (10%): val_loss: 0.0309 - val_mean_absolute_error: 0.0949
-    * Test set (10%): test_loss: 0.02116 - test_mean_absolute_error: 0.09699
+   - Training set (80%): loss: 0.0130 - mean_absolute_error: 0.0637
+   - Validation set (10%): val_loss: 0.0309 - val_mean_absolute_error: 0.0949
+   - Test set (10%): test_loss: 0.02116 - test_mean_absolute_error: 0.09699
 
 The tensorboard gave me the following plots. Both loss and mae are dropping consistently on both training and validation set. The overfitting issue is not too bad in this model.
 
