@@ -43,6 +43,7 @@ def load_csv_to_df(data_dir):
     return log_df
 
 
+# Generate the training data using all the cameras and flip images.
 def training_data_generator(data_dir, dataset='train', steering_correction=0.2, batch_size = 64,
                             shuffle_data=True, add_weight=True, add_flip=True):
     log_df = load_csv_to_df(data_dir)
@@ -96,6 +97,7 @@ def training_data_generator(data_dir, dataset='train', steering_correction=0.2, 
                     weight_batch = []
 
 
+# Resize and normalize the image.
 def resize_normalize(image):
     from keras.backend import tf as ktf
     resized = ktf.image.resize_images(image, (139, 139))
@@ -123,6 +125,7 @@ def inception3(data_dir, model_path):
     inp = inception(resized_input)
     out = GlobalAveragePooling2D()(inp)
     fc1 = Dense(64, activation='relu')(out)
+    fc1 = Dropout(0.5)(fc1)
     predictions = Dense(1)(fc1)
     model = Model(inputs=car_input, outputs=predictions)
 
@@ -133,12 +136,14 @@ def inception3(data_dir, model_path):
 
     print(model.summary())
 
+    # Generators for the data.
     train_generator = training_data_generator(data_dir, 'train', batch_size=batch_size)
     valid_generator = training_data_generator(data_dir, 'valid', batch_size=batch_size)
     test_generator = training_data_generator(data_dir, 'test', batch_size=batch_size)
     steps_per_epoch = int(total_samples * 0.9) / batch_size
     validation_steps = int(total_samples * 0.1) / batch_size
 
+    # Callback functions.
     early_stop = EarlyStopping(
         monitor='val_loss', min_delta=0.001, patience=6, mode='min', verbose=1)
     checkpoint = ModelCheckpoint(
@@ -158,6 +163,7 @@ def inception3(data_dir, model_path):
         write_graph=True,
         write_images=False)
 
+    # Train the model.
     history_object = model.fit_generator(
         train_generator,
         steps_per_epoch=steps_per_epoch,
@@ -171,6 +177,7 @@ def inception3(data_dir, model_path):
     # val_loss: 0.0309 - val_mean_absolute_error: 0.0949
     # Test loss: 0.02116 - Test mae:  0.09699
 
+    # Evaluate the model on the test set.
     score = model.evaluate_generator(test_generator, steps=validation_steps)
     print('Test loss:', score[0])
     print('Test mae:', score[1])
